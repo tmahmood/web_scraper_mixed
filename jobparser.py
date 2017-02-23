@@ -8,10 +8,12 @@ class JobParser(ParseListingPage):
     def __init__(self, url_tpl, keyword, baseurl):
         """setup parser parser """
         searchurl = url_tpl % (keyword, 1)
-        ParseListingPage(JobParser, self).__init__(searchurl, baseurl)
+        super(JobParser, self).__init__(searchurl, baseurl)
+        self.current_page = 1
         self.url_tpl = url_tpl
         self.keyword = keyword
         self.LISTING = None
+        self.db_name = None
 
     def next_page(self):
         """go to next page
@@ -25,11 +27,25 @@ class JobParser(ParseListingPage):
 class JobItem(ParseItemPage):
     """get job details"""
     def __init__(self, url, baseurl, keyword):
-        ParseItemPage(JobItem, self).__init__(url, baseurl)
-        self.TITLE = 'h1.jobtitle'
-        self.DESC = 'div.templatetext'
-        self.NAME = '.state-message'
+        super(JobItem, self).__init__(url, baseurl)
+        self.TITLE = None
+        self.DESC = None
+        self.NAME = None
         self.keyword = keyword
+
+    def get_name(self):
+        """implement in subclass
+        :returns: @todo
+
+        """
+        raise NotImplementedError()
+
+    def get_job_id(self):
+        """implement in subclass
+        :returns: @todo
+
+        """
+        raise NotImplementedError()
 
     def get_extra(self, data):
         """get extra data
@@ -39,8 +55,7 @@ class JobItem(ParseItemPage):
 
         """
         data['url'] = self.url
-        data['name'] = self.dom.cssselect(self.NAME)[0].text_content().strip('-')
         data['keyword'] = self.keyword
-        data['job_id'] = self.url.split('?')[0].split('/').pop()
-
+        data['name'] = self.get_name()
+        data['job_id'] = self.get_job_id()
 

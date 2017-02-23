@@ -2,78 +2,46 @@
 parses gumtree jobs
 """
 import sys
-from parser import ParseItemPage, ParseListingPage
+from jobparser import JobParser, JobItem
 import logging
-import sqlite3
+import db
 
 DB_NAME = 'gumtree.db'
 BASEURL = 'https://www.gumtree.com.au/'
 URL = 'https://www.gumtree.com.au/s-%s/page-%s/k0'
 
 
-class GumTree(ParseListingPage):
+class GumTree(JobParser):
 
     """parse gumtree.com"""
 
     def __init__(self, keyword):
         """setup GumTree parser """
-        super(GumTree, self).__init__(URL % (keyword, 1), BASEURL)
-        self.keyword = keyword
+        super(GumTree, self).__init__(URL, keyword, BASEURL)
         self.LISTING = 'a.ad-listing__title-link'
 
-    def next_page(self):
-        """go to next page
-        :returns: @todo
 
-        """
-        self.current_page += 1
-        return URL % (self.keyword, self.current_page)
-
-
-class Job(ParseItemPage):
+class Job(JobItem):
     """get job details"""
     def __init__(self, url):
-        super(Job, self).__init__(url, BASEURL)
+        super(Job, self).__init__(url, BASEURL, sys.argv[0])
         self.TITLE = 'h1#ad-title'
         self.DESC = 'div#ad-description-details'
         self.NAME = '.seller-profile__seller-detail a'
-        self.keyword = sys.argv[1]
 
-    def get_extra(self, data):
-        """get extra data
-
-        :data: @todo
+    def get_name(self):
+        """get name
         :returns: @todo
 
         """
-        data['url'] = self.url
-        data['name'] = self.dom.cssselect(self.NAME)[0].text_content().strip('-')
-        data['keyword'] = self.keyword
-        data['job_id'] = self.url.split('/').pop()
+        return self.dom.cssselect(self.NAME)[0].text_content().strip(' - ')
 
+    def get_job_id(self):
+        """return job id
+        :returns: @todo
 
-def on_page_done(data, success, failed):
-    """do something once we have downloaded a page
-
-    :parser: the parser object
-    :data: @todo
-    :success: @todo
-    :failed: @todo
-    :returns: @todo
-
-    """
-    logging.info("Saving [%s]/ Failed [%s]", success, failed)
-    build = []
-    for job in data:
-        build.append((job['url'], job['title'], job['description'],
-                      job['name'], job['keyword'], job['job_id']))
-    sql = """insert into jobs (url, title, description, name, keyword,
-             job_id) values(?, ?, ?, ?, ?, ?)"""
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.executemany(sql, build)
-    conn.commit()
-    conn.close()
+        """
+        return self.url.split('/').pop()
 
 
 def job_parser(url):
@@ -86,20 +54,17 @@ def job_parser(url):
     return Job(url)
 
 
-def create_db():
-    """create database
+def on_page_done(data, success, failed):
+    """@todo: Docstring for on_page_done.
+
+    :done: @todo
+    :success: @todo
+    :failed: @todo
     :returns: @todo
 
     """
-    conn = sqlite3.connect(DB_NAME)
-    sql = '''CREATE TABLE jobs (url text, title text, description text,
-             name text, keyword text, job_id real unique)'''
-    try:
-        conn.execute(sql)
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass
-    conn.close()
+    logging.info("Success [%s]/ Failed [%s]", success, failed)
+    db.store_to_db(DB_NAME, data)
 
 
 def main():
@@ -107,11 +72,11 @@ def main():
     Entry point
     """
     logging.basicConfig(format='[%(levelname)s] - %(message)s', level=logging.INFO)
-    create_db()
+    db.create_db(DB_NAME)
     keyword = sys.argv[1]
     logging.info("Keyword: %s", keyword)
-    seek = GumTree(keyword)
-    seek.parse_listing_pages(job_parser, on_page_done)
+    gumtree = GumTree(keyword)
+    gumtree.parse_listing_pages(job_parser, on_page_done)
 
 if __name__ == '__main__':
     main()

@@ -25,6 +25,7 @@ class Parser(object):
 
 class ParseListingPage(Parser):
     """parse listing pages"""
+
     def __init__(self, url, baseurl):
         super(ParseListingPage, self).__init__(baseurl)
         self.page_url = url
