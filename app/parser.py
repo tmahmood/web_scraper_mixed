@@ -1,4 +1,4 @@
-import util
+import app.util as util
 import time
 import logging
 
@@ -32,7 +32,7 @@ class ParseListingPage(Parser):
         self.current_page = 1
         self.LISTING = None
 
-    def parse_listing_pages(self, itemparser, on_page_done):
+    def parse_listing_pages(self, itemparser, on_page_done, **argv):
         """parse all pages
         :returns: @todo
 
@@ -44,7 +44,7 @@ class ParseListingPage(Parser):
                 logging.info("parsing page - %s", self.current_page)
                 data, success, failed = self.download()\
                                             .get_listing()\
-                                            .parse_items(itemparser)
+                                            .parse_items(itemparser, argv)
                 on_page_done(data, success, failed)
                 breakafter += 1
                 if breakafter >= 2:
@@ -64,7 +64,7 @@ class ParseListingPage(Parser):
         self._download(self.next_page())
         return self
 
-    def parse_items(self, itemparser):
+    def parse_items(self, itemparser, argv):
         """items to parse
         :returns: @todo
 
@@ -75,7 +75,7 @@ class ParseListingPage(Parser):
         urls = 0
         for item in self.items:
             logging.info("parsing item: %s", item.text_content().strip())
-            parser = itemparser(item.attrib['href'])
+            parser = itemparser(item.attrib['href'], argv)
             parser.session = self.session
             try:
                 page_data = parser.download().parse_page()

@@ -1,4 +1,5 @@
-from parser import ParseListingPage, ParseItemPage
+from app.parser import ParseListingPage, ParseItemPage
+import logging
 
 
 class JobParser(ParseListingPage):
@@ -8,6 +9,7 @@ class JobParser(ParseListingPage):
     def __init__(self, url_tpl, keyword, baseurl):
         """setup parser parser """
         searchurl = url_tpl % (keyword, 1)
+        logging.info("search url: %s", searchurl)
         super(JobParser, self).__init__(searchurl, baseurl)
         self.current_page = 1
         self.url_tpl = url_tpl
