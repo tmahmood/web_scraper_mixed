@@ -7,11 +7,13 @@ def get_dom(url, baseurl, session=None):
     """get dom from html
 
     """
-    try:
-        resp = session.get(url)
-    except AttributeError:
-        session = requests.Session()
-        resp = session.get(url)
+    while True:
+        try:
+            resp = session.get(url)
+            break
+        except AttributeError:
+            session = requests.Session()
+            continue
     dom = html.fromstring(resp.content)
     return html.make_links_absolute(dom, baseurl)
 

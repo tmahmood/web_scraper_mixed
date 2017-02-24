@@ -11,15 +11,13 @@ def store_to_db(db_name, data):
     :returns: @todo
 
     """
-    build = []
-    for job in data:
-        build.append((job['url'], job['title'], job['description'],
-                      job['name'], job['keyword'], job['job_id']))
-    sql = """insert into jobs (url, title, description, name, keyword,
-             job_id) values(?, ?, ?, ?, ?, ?)"""
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
-    cursor.executemany(sql, build)
+    sql = """insert into jobs (url, title, description, name, keyword,
+             job_id) values(?, ?, ?, ?, ?, ?)"""
+    for job in data:
+        cursor.execute(sql, (job['url'], job['title'], job['description'],
+                             job['name'], job['keyword'], job['job_id']))
     conn.commit()
     conn.close()
 

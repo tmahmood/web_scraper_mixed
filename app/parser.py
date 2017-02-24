@@ -40,7 +40,6 @@ class ParseListingPage(Parser):
         :returns: @todo
 
         """
-        breakafter = 0
         tries = 0
         while True:
             try:
@@ -49,14 +48,14 @@ class ParseListingPage(Parser):
                                             .get_listing()\
                                             .parse_items(itemparser, argv)
                 on_page_done(data, success, failed)
-                breakafter += 1
-                if breakafter >= 2:
-                    break
+            except KeyboardInterrupt:
+                logging.warn("KeyboardInterrupt, exiting")
+                break
             except Exception as e:
                 logging.exception(e)
                 tries += 1
                 if tries > 3:
-                    print("Failed to continue: %s", e)
+                    logging.warn("Failed to continue: %s", e)
                     break
 
     def download(self):
@@ -84,6 +83,7 @@ class ParseListingPage(Parser):
                 page_data = parser.download().parse_page()
                 data.append(page_data)
             except IndexError:
+                logging.warn("Failed to parse page: %s", item.attrib['href'])
                 failed += 1
                 continue
             success += 1
