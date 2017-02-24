@@ -2,7 +2,7 @@ Installation
 ============
 You need latest version of (Python 3)[https://www.python.org/downloads/]
 
-Once installed, open command prompt and  execute the followings to install other
+Once installed, open command prompt and execute the followings to install other
 required files
 
     py -m pip install lxml requests cssselect
