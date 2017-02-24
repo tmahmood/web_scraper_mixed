@@ -1,3 +1,6 @@
+"""
+base parser class
+"""
 import app.util as util
 import time
 import logging
@@ -13,7 +16,7 @@ class Parser(object):
         self.url = None
         self.items = None
         self.dom = None
-        self.givethembreak = 5
+        self.givethembreak = 3
 
     def _download(self, url):
         """download the listing page
