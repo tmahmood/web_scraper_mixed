@@ -15,11 +15,19 @@ def store_to_db(db_name, data):
     cursor = conn.cursor()
     sql = """insert into jobs (url, title, description, name, keyword,
              job_id) values(?, ?, ?, ?, ?, ?)"""
+    saved = 0
+    failed = 0
     for job in data:
-        cursor.execute(sql, (job['url'], job['title'], job['description'],
-                             job['name'], job['keyword'], job['job_id']))
-    conn.commit()
+        try:
+            cursor.execute(sql, (job['url'], job['title'], job['description'],
+                                 job['name'], job['keyword'], job['job_id']))
+            conn.commit()
+            saved += 1
+        except sqlite3.InternalError:
+            failed += 1
+            continue
     conn.close()
+    return saved, failed
 
 
 def create_db(db_name):

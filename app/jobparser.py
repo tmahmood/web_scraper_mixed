@@ -11,7 +11,6 @@ class JobParser(ParseListingPage):
         searchurl = url_tpl % (keyword, 1)
         logging.info("search url: %s", searchurl)
         super(JobParser, self).__init__(searchurl, baseurl)
-        self.current_page = 1
         self.url_tpl = url_tpl
         self.keyword = keyword
         self.LISTING = None
@@ -22,7 +21,6 @@ class JobParser(ParseListingPage):
         :returns: @todo
 
         """
-        self.current_page += 1
         return self.url_tpl % (self.keyword, self.current_page)
 
 

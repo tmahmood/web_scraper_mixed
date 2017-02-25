@@ -37,7 +37,9 @@ class Runner(object):
 
         """
         logging.info("Success [%s]/ Failed [%s]", success, failed)
-        db.store_to_db(self.db_name, data)
+        stored, not_stored = db.store_to_db(self.db_name, data)
+        logging.info("Saved [%s]/ Failed [%s]", stored, not_stored)
+
 
 
 def job_parser(url, argv):

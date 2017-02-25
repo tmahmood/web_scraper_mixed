@@ -34,6 +34,7 @@ class ParseListingPage(Parser):
         self.page_url = url
         self.current_page = 1
         self.LISTING = None
+        self.items = None
 
     def parse_listing_pages(self, itemparser, on_page_done, **argv):
         """parse all pages
@@ -48,6 +49,9 @@ class ParseListingPage(Parser):
                                             .get_listing()\
                                             .parse_items(itemparser, argv)
                 on_page_done(data, success, failed)
+                if self.should_exit():
+                    logging.info("Scraping done ...")
+                    break
             except KeyboardInterrupt:
                 logging.warn("KeyboardInterrupt, exiting")
                 break
@@ -58,12 +62,20 @@ class ParseListingPage(Parser):
                     logging.warn("Failed to continue: %s", e)
                     break
 
+    def should_exit(self):
+        """check if we should exit now
+        :returns: true or false
+
+        """
+        return True
+
     def download(self):
         """download listing page
         :returns: @todo
 
         """
         self._download(self.next_page())
+        self.current_page += 1
         return self
 
     def parse_items(self, itemparser, argv):
@@ -99,17 +111,17 @@ class ParseListingPage(Parser):
         :returns: @todo
 
         """
-        self.items = self.dom.cssselect(self.LISTING)
+        self.items = self.dom.xpath(self.LISTING)
         return self
 
     def next_page(self):
         """load next page
+        should be extended in subclasses
 
         :f: @todo
         :returns: @todo
 
         """
-        self.current_page += 1
         return self.page_url % self.current_page
 
 
@@ -134,16 +146,24 @@ class ParseItemPage(Parser):
 
         :returns: @todo
         """
-        return self.dom.cssselect(self.TITLE)[0]\
-                   .text_content()\
-                   .strip()
+        try:
+            return self.dom.xpath(self.TITLE)[0]\
+                           .text_content()\
+                           .strip()
+        except IndexError:
+            return self.failed_parsing('title')
 
     def get_description(self):
         """get page description
         :returns: @todo
 
         """
-        return self.dom.cssselect(self.DESC)[0].text_content().strip()
+        try:
+            return self.dom.xpath(self.DESC)[0]\
+                           .text_content()\
+                           .strip()
+        except IndexError:
+            return self.failed_parsing('description')
 
     def get_extra(self, data):
         """fills up other data, does nothing
@@ -155,6 +175,17 @@ class ParseItemPage(Parser):
 
         """
         pass
+
+    def failed_parsing(self, whichone):
+        """do something about failed items
+        should be implemented in subclasses
+
+        :whichone: @todo
+        :returns: @todo
+
+        """
+        logging.error("Failed to parse: %s", whichone)
+        return ""
 
     def parse_page(self):
         """parsed the page for product data
