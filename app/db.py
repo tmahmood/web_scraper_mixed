@@ -23,6 +23,8 @@ def store_to_db(db_name, data):
                                  job['name'], job['keyword'], job['job_id']))
             conn.commit()
             saved += 1
+        except sqlite3.IntegrityError:
+            continue
         except sqlite3.InternalError:
             failed += 1
             continue

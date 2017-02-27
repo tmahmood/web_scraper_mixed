@@ -3,6 +3,7 @@ parses gumtree jobs
 """
 from app.jobparser import JobParser, JobItem
 import parsedatetime
+import re
 
 DB_NAME = 'gumtree.db'
 BASEURL = 'https://www.gumtree.com.au/'
@@ -29,6 +30,16 @@ class GumTree(JobParser):
         cal = parsedatetime.Calendar()
         post_time = cal.parse(last_one.text_content())
         return post_time < self.TWENTY_FOUR_HR_OLD
+
+    def match_criteria(self, page_data):
+        """check if description contains email address
+
+        :page_data: @todo
+        :returns: @todo
+
+        """
+        return re.search(string=page_data['description'],
+                  pattern=r'[\w*\.-]+@[\w*\.-]+') != None
 
 
 class Job(JobItem):

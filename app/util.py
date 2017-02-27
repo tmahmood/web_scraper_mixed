@@ -8,8 +8,9 @@ def get_dom(url, baseurl, session=None):
 
     """
     while True:
+        headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:54.0)'}
         try:
-            resp = session.get(url)
+            resp = session.get(url, headers=headers)
             break
         except AttributeError:
             session = requests.Session()

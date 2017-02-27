@@ -2,6 +2,7 @@
 parses seek job
 """
 from app.jobparser import JobParser, JobItem
+import re
 
 DB_NAME = 'seek.db'
 BASEURL = 'https://www.seek.com.au/'
@@ -26,6 +27,16 @@ class Seek(JobParser):
         if len(anext) == 0:
             return True
         return False
+
+    def match_criteria(self, page_data):
+        """check if description contains email address
+
+        :page_data: @todo
+        :returns: @todo
+
+        """
+        return re.search(string=page_data['description'],
+                  pattern=r'[\w*\.-]+@[\w*\.-]+') != None
 
 
 class Job(JobItem):

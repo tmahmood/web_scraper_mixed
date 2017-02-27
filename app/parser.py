@@ -4,6 +4,7 @@ base parser class
 import app.util as util
 import time
 import logging
+import json
 
 
 class Parser(object):
@@ -16,7 +17,7 @@ class Parser(object):
         self.url = None
         self.items = None
         self.dom = None
-        self.givethembreak = 3
+        self.timeouts = json.load(open('timeout.json', 'r'))
 
     def _download(self, url):
         """download the listing page
@@ -52,6 +53,7 @@ class ParseListingPage(Parser):
                 if self.should_exit():
                     logging.info("Scraping done ...")
                     break
+                time.sleep(self.timeouts['page'])
             except KeyboardInterrupt:
                 logging.warn("KeyboardInterrupt, exiting")
                 break
@@ -78,6 +80,16 @@ class ParseListingPage(Parser):
         self.current_page += 1
         return self
 
+    def match_criteria(self, data):
+        """check if item meeds the specific criteria
+        should be extended in subclass
+
+        :item: @todo
+        :returns: @todo
+
+        """
+        return True
+
     def parse_items(self, itemparser, argv):
         """items to parse
         :returns: @todo
@@ -86,24 +98,22 @@ class ParseListingPage(Parser):
         data = []
         success = 0
         failed = 0
-        urls = 0
         for item in self.items:
-            logging.info("parsing item: %s", item.text_content().strip())
             parser = itemparser(item.attrib['href'], argv)
             parser.session = self.session
             try:
                 page_data = parser.download().parse_page()
-                data.append(page_data)
             except IndexError:
                 logging.warn("Failed to parse page: %s", item.attrib['href'])
                 failed += 1
                 continue
+            if not self.match_criteria(page_data):
+                logging.info("No emails found: %s", item.text_content().strip())
+                continue
+            logging.info("parsing item: %s", item.text_content().strip())
+            data.append(page_data)
             success += 1
-            urls += 1
-            if urls >= 10:
-                logging.info("sleeping")
-                time.sleep(self.givethembreak)
-                urls = 0
+            time.sleep(self.timeouts['item'])
         return data, success, failed
 
     def get_listing(self):
