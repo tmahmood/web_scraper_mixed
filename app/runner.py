@@ -41,7 +41,6 @@ class Runner(object):
         logging.info("Saved [%s]/ Failed [%s]", stored, not_stored)
 
 
-
 def job_parser(url, argv):
     """returns job parser
 

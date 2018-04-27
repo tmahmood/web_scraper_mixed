@@ -21,7 +21,9 @@ def main():
     """
     Entry point
     """
-    logging.basicConfig(format='[%(levelname)s] - %(message)s', level=logging.INFO)
+    logging.basicConfig(
+        format='[%(levelname)s] - %(message)s',
+        level=logging.INFO)
     if len(sys.argv) < 3:
         logging.error(MESSAGE)
         sys.exit(1)
