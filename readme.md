@@ -1,8 +1,4 @@
-## NOTE
-This file viewed better with [MarkdownPad](http://markdownpad.com/)
-
 # Installation
-============
 You need latest version of [Python 3](https://www.python.org/downloads/)
 
 Once installed, Open command prompt by Pressing `<Win> + R` simultaneously
@@ -16,8 +12,7 @@ And execute the followings to install other required files
 
 That's all!
 
-How to execute the application
-==============================
+# How to execute the application
 
 Open cmd prompt in the application folder,
 1. Open the application folder in File explorer
